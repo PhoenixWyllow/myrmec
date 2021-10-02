@@ -1,21 +1,24 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net45;netstandard1.3</TargetFrameworks>
+    <TargetFrameworks>net48;netstandard2.1;netcoreapp3.1;net5.0</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Authors>rocket robin</Authors>
-    <Company>rocket robin</Company>
-    <Description>This is a very small library, with only one function, which is to convert the file suffix name to the corresponding MIME type, and if you want to identify the real format of the file, you can refer to the myrmec project.</Description>
-    <Copyright>Copyright (c) Rocket Robin</Copyright>
-    <PackageLicenseUrl>https://github.com/rocketRobin/myrmec/blob/master/LICENSE</PackageLicenseUrl>
-    <PackageProjectUrl>https://github.com/rocketRobin/myrmec</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/rocketRobin/myrmec</RepositoryUrl>
+    <Authors>PhoenixWyllow, rocket robin</Authors>
+    <Company>PW.dev (pw.dev@outlook.com)</Company>
+    <Description>This is a very small library, with only one function, which is to convert the file suffix name to the corresponding MIME type.
+If you want to identify the real format of the file, you can refer to the myrmec project.</Description>
+    <Copyright>PhoenixWyllow, Rocket Robin</Copyright>
+    <PackageLicenseUrl></PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/PhoenixWyllow/myrmec</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/PhoenixWyllow/myrmec</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>MIME</PackageTags>
     <PackageReleaseNotes>This project is independent from the myrmec project</PackageReleaseNotes>
-    <AssemblyVersion>1.2.0.0</AssemblyVersion>
-    <FileVersion>1.2.0.0</FileVersion>
-    <Version>1.2.0</Version>
+    <AssemblyVersion>1.3.0.0</AssemblyVersion>
+    <FileVersion>1.3.0.0</FileVersion>
+    <Version>1.3.0</Version>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -25,5 +28,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
 
 </Project>
