@@ -9,172 +9,187 @@ using System.Linq;
 
 namespace Myrmec
 {
-    /// <summary>
-    /// sniffer
-    /// </summary>
-    public class Sniffer
-    {
-        /// <summary>
-        /// You can get the file extention name detail in this wikipedia page.
-        /// </summary>
-        public const string FileExtentionHelpUrl = "https://en.wikipedia.org/wiki/List_of_file_signatures";
-        
-        /// <summary>
-        /// For even more magic number details, you can use this link
-        /// </summary>
-        public const string FileExtentionHelpUrl2 = "https://www.garykessler.net/library/file_sigs.html";
+	/// <summary>
+	/// sniffer
+	/// </summary>
+	public class Sniffer
+	{
+		/// <summary>
+		/// You can get the file extention name detail in this wikipedia page.
+		/// </summary>
+		public const string FileExtentionHelpUrl = "https://en.wikipedia.org/wiki/List_of_file_signatures";
 
-        private readonly Node _root;
+		/// <summary>
+		/// For even more magic number details, you can use this link
+		/// </summary>
+		public const string FileExtentionHelpUrl2 = "https://www.garykessler.net/library/file_sigs.html";
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Sniffer"/> class.
-        /// </summary>
-        public Sniffer()
-        {
-            _root = new Node()
-            {
-                Children = new SortedList<byte, Node>(128),
-                Depth = -1,
-            };
-            ComplexMetadata = new List<Metadata>(10);
-        }
+		private readonly Node _root;
 
-        /// <summary>
-        /// Gets or sets ComplexMetadatas.
-        /// </summary>
-        public List<Metadata> ComplexMetadata { get; set; }
+		private int suggestedMaxBufferSize = 0;
 
-        /// <summary>
-        /// Add a record to matadata tree.
-        /// </summary>
-        /// <param name="data">file head.</param>
-        /// <param name="extentions">file extention list.</param>
-        public void Add(byte[] data, string[] extentions)
-        {
-            Add(data, _root, extentions, 0);
-        }
+		/// <summary>
+		/// A helper property if you are unsure how large the header buffer should be.
+		/// </summary>
+		public int SuggestedMaxBufferSize
+		{
+			get => suggestedMaxBufferSize;
+			//TODO this is an imprecise implementation. The entire concept will require refactoring to improve. If you see this note, this is up-for-grabs if you want the challenge.
+			internal set => suggestedMaxBufferSize = Math.Max(suggestedMaxBufferSize, value);
+		}
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="record"></param>
-        public void Add(Record record)
-        {
-            if (record.IsComplexMetadata)
-            {
-                ComplexMetadata.Add(record);
-            }
-            else
-            {
-                Add(record.Hex.GetByte(), record.Extentions.Split(',', ' '));
-            }
-        }
+		/// <summary>
+		/// Initializes a new instance of the <see cref="Sniffer"/> class.
+		/// </summary>
+		public Sniffer()
+		{
+			_root = new Node()
+			{
+				Children = new SortedList<byte, Node>(128),
+				Depth = -1,
+			};
+			ComplexMetadata = new List<Metadata>(10);
+		}
 
-        /// <summary>
-        /// Find extentions that match the file hex head.
-        /// </summary>
-        /// <param name="data">file hex head</param>
-        /// <param name="matchAll">match all result or only the first.</param>
-        /// <returns>matched result</returns>
-        public List<string> Match(byte[] data, bool matchAll = false)
-        {
-            List<string> extentionStore = new List<string>(4);
-            Match(data, 0, _root, extentionStore, matchAll);
+		/// <summary>
+		/// Gets or sets ComplexMetadatas.
+		/// </summary>
+		public List<Metadata> ComplexMetadata { get; set; }
 
-            if (matchAll || !extentionStore.Any())
-            {
-                // Match data from complex metadata.
-                extentionStore.AddRange(ComplexMetadata.Match(data, matchAll));
-            }
+		/// <summary>
+		/// Add a record to metadata tree.
+		/// </summary>
+		/// <param name="data">file head.</param>
+		/// <param name="extentions">file extention list.</param>
+		public void Add(byte[] data, string[] extentions)
+		{
+			Add(data, _root, extentions, 0);
 
-            // Remove repeated extentions.
-            if (matchAll && extentionStore.Any())
-            {
-                extentionStore = extentionStore.Distinct().ToList();
-            }
+			SuggestedMaxBufferSize = data.Length;
+		}
 
-            return extentionStore;
-        }
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="record"></param>
+		public void Add(Record record)
+		{
+			if (record.IsComplexMetadata)
+			{
+				ComplexMetadata.Add(record);
+			}
+			else
+			{
+				Add(record.Hex.GetBytes(), record.Extentions.Split(',', ' '));
+			}
 
-        private void Add(byte[] data, Node parent, string[] extentions, int depth)
-        {
-            Node current = null;
+			SuggestedMaxBufferSize = record.Hex.Length;
+		}
 
-            if (parent.Children == null)
-            {
-                parent.Children = new SortedList<byte, Node>(Convert.ToInt32(128 / Math.Pow(2, depth)));
-            }
+		/// <summary>
+		/// Find extentions that match the file hex head.
+		/// </summary>
+		/// <param name="data">file hex head</param>
+		/// <param name="matchAll">match all result or only the first.</param>
+		/// <returns>matched result</returns>
+		public List<string> Match(byte[] data, bool matchAll = false)
+		{
+			List<string> extentionStore = new List<string>(4);
+			Match(data, 0, _root, extentionStore, matchAll);
 
-            // if not contains current byte index, create node and put it into children.
-            if (!parent.Children.ContainsKey(data[depth]))
-            {
-                current = new Node
-                {
-                    Depth = depth,
-                    Parent = parent
-                };
-                parent.Children.Add(data[depth], current);
-            }
-            else
-            {
-                if (!parent.Children.TryGetValue(data[depth], out current))
-                {
-                    throw new Exception("No possibility, something fucked up...");
-                }
+			if (matchAll || !extentionStore.Any())
+			{
+				// Match data from complex metadata.
+				extentionStore.AddRange(ComplexMetadata.Match(data, matchAll));
+			}
 
-            }
+			// Remove repeated extentions.
+			if (matchAll && extentionStore.Any())
+			{
+				extentionStore = extentionStore.Distinct().ToList();
+			}
 
-            // last byte, put extentions into Extentions.
-            if (depth == (data.Length - 1))
-            {
-                if (current.Extentions == null)
-                {
-                    current.Extentions = new List<string>(4);
-                }
+			return extentionStore;
+		}
 
-                current.Extentions.AddRange(extentions);
-                return;
-            }
+		private void Add(byte[] data, Node parent, string[] extentions, int depth)
+		{
+			if (parent.Children == null)
+			{
+				parent.Children = new SortedList<byte, Node>(Convert.ToInt32(128 / Math.Pow(2, depth)));
+			}
 
-            Add(data, current, extentions, depth + 1);
-        }
+			Node current;
+			// if not contains current byte index, create node and put it into children.
+			if (!parent.Children.ContainsKey(data[depth]))
+			{
+				current = new Node
+				{
+					Depth = depth,
+					Parent = parent
+				};
+				parent.Children.Add(data[depth], current);
+			}
+			else
+			{
+				if (!parent.Children.TryGetValue(data[depth], out current))
+				{
+					throw new Exception("No possibility, something fucked up...");
+				}
 
-        private void Match(byte[] data, int depth, Node node, List<string> extentionStore, bool matchAll)
-        {
-            // if depth out of data.Length's index then data end.
-            if (data.Length == depth)
-            {
-                return;
-            }
+			}
 
-            node.Children.TryGetValue(data[depth], out Node current);
+			// last byte, put extentions into Extentions.
+			if (depth == (data.Length - 1))
+			{
+				if (current.Extentions == null)
+				{
+					current.Extentions = new List<string>(4);
+				}
 
-            // can't find matched node, match ended.
-            if (current == null)
-            {
-                return;
-            }
+				current.Extentions.AddRange(extentions);
+				return;
+			}
 
-            // now extentions not null, this node is a final node and this is a result.
-            if (current.Extentions != null)
-            {
-                extentionStore.AddRange(current.Extentions);
+			Add(data, current, extentions, depth + 1);
+		}
 
-                // if only match first matched.
-                if (!matchAll)
-                {
-                    return;
-                }
-            }
+		private void Match(byte[] data, int depth, Node node, List<string> extentionStore, bool matchAll)
+		{
+			// if depth out of data.Length's index then data end.
+			if (data.Length == depth)
+			{
+				return;
+			}
 
-            // children is null, match ended.
-            if (current.Children == null)
-            {
-                return;
-            }
+			node.Children.TryGetValue(data[depth], out Node current);
 
-            // children not null, keep match.
-            Match(data, depth + 1, current, extentionStore, matchAll);
-        }
-    }
+			// can't find matched node, match ended.
+			if (current == null)
+			{
+				return;
+			}
+
+			// now extentions not null, this node is a final node and this is a result.
+			if (current.Extentions != null)
+			{
+				extentionStore.AddRange(current.Extentions);
+
+				// if only match first matched.
+				if (!matchAll)
+				{
+					return;
+				}
+			}
+
+			// children is null, match ended.
+			if (current.Children == null)
+			{
+				return;
+			}
+
+			// children not null, keep match.
+			Match(data, depth + 1, current, extentionStore, matchAll);
+		}
+	}
 }

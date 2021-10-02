@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2027
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31702.278
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9ECAF633-B229-46F6-B056-85FDB640349F}"
 EndProject
@@ -11,9 +11,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Myrmec", "src\Myrmec\Myrmec
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Myrmec.Test", "test\Myrmec.Test\Myrmec.Test.csproj", "{A1D7C307-9E80-4DE6-8393-BF9A362C91BB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Myrmec.Mime", "src\Myrmec.Mime\Myrmec.Mime.csproj", "{16A485B7-C34D-4405-90F7-EC9021BDC299}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Myrmec.Mime", "src\Myrmec.Mime\Myrmec.Mime.csproj", "{16A485B7-C34D-4405-90F7-EC9021BDC299}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Myrmec.Mime.Test", "test\Myrmec.Mime.Test\Myrmec.Mime.Test.csproj", "{813F86E5-EFC0-42B8-93E9-B88DB6C5846D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Myrmec.Mime.Test", "test\Myrmec.Mime.Test\Myrmec.Mime.Test.csproj", "{813F86E5-EFC0-42B8-93E9-B88DB6C5846D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{377088F2-58D1-403F-A7CB-7C6354C125E8}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
